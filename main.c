@@ -20,20 +20,33 @@ void die(char *e, int l) {
     exit(1);
 }
 
+void pop(stack *s) {
+    s->size -= 1;
+}
+
 char* read_file(char *file_name) {
     FILE* f;
     if ((f = fopen(file_name, "r")) == NULL) die("Cannot open file.", -1);
     
-    int charCount = 0;
-
-    for (char c = getc(f); c != EOF; c = getc(f)) {
-        charCount += 1;
-    }
+   int rc = fseek(f, 0L, SEEK_END);
+   long offset_end = ftell(f);
+   size_t fs = (size_t)offset_end;
 
     rewind(f);
-    char *p = malloc(charCount + 1);
-    fscanf(f, "%s", p);
+    char *buffer = malloc(fs);
+    char *p = malloc(fs);
+    fread(buffer, 1, fs, f);
 
+    int p_length = 0;
+    for (int i = 0; i < strlen(buffer); i++) {
+        char c = buffer[i];
+        if (c == '>' || c == '<' || c == '+' || c == '-' || c == '[' || c == ']' || c == '.' || c == ',') {
+            p[p_length] = c;
+            p_length++;
+        }
+    }
+
+    free(buffer);
     return p;
 }
 
